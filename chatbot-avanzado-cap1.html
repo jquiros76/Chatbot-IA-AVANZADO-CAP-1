@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatbot IA Avanzado · Capítulo 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060810;--bg2:#080c18;--bg3:#0d1220;
+  --card:#0f1628;--card2:#141d35;
+  --border:#1a2540;--border2:#223060;
+  --ink:#e8f0ff;--ink2:#9ab0e0;--muted:#4a5f90;
+  --blue:#3d7aff;--blue-g:#3d7aff30;
+  --cyan:#00e5ff;--cyan-g:#00e5ff20;
+  --orange:#ff6b35;--orange-g:#ff6b3520;
+  --green:#00ff88;--green-g:#00ff8818;
+  --red:#ff3d6b;
+  --gold:#ffd166;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+
+/* SCANLINES */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
+
+/* HERO */
+.hero{padding:56px 48px 48px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 20%,#3d7aff12,transparent),radial-gradient(ellipse 40% 60% at 10% 80%,#00e5ff08,transparent);pointer-events:none}
+.hero-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.eyebrow-chip{display:inline-flex;align-items:center;gap:7px;background:var(--blue-g);border:1px solid var(--blue);border-radius:4px;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--blue);letter-spacing:.06em}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:blink 1.4s infinite}
+.hero-cap{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#5a7aaa;letter-spacing:.1em;text-transform:uppercase;letter-spacing:.1em;text-transform:uppercase}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:700;line-height:1.05;color:#fff;position:relative;z-index:1}
+.hero h1 .accent{color:var(--cyan);font-style:italic}
+.hero h1 .accent2{color:var(--orange)}
+.hero-sub{margin-top:16px;font-size:1rem;color:#b0c4e8;max-width:560px;line-height:1.75;font-weight:300;position:relative;z-index:1}
+.hero-stats{display:flex;gap:40px;margin-top:36px;flex-wrap:wrap;position:relative;z-index:1}
+.hstat{border-left:2px solid var(--border2);padding-left:16px}
+.hstat-val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--cyan);line-height:1}
+.hstat-lbl{font-size:.72rem;color:#8aa8d8;margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 260px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:28px 0;position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2)}
+
+.prog-wrap{padding:0 20px 24px;border-bottom:1px solid var(--border)}
+.prog-top{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);margin-bottom:8px}
+.prog-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:2px;transition:width .4s ease;width:0%}
+
+.nav-section{padding:20px 20px 6px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+
+.mod-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:none;border:none;cursor:pointer;color:var(--ink2);font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:600;text-align:left;transition:color .2s}
+.mod-btn:hover{color:var(--ink)}
+.mod-badge{font-family:'JetBrains Mono',monospace;font-size:.62rem;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 7px;color:var(--muted)}
+
+.les-btn{width:100%;display:flex;align-items:center;gap:9px;padding:8px 20px 8px 32px;background:none;border:none;cursor:pointer;color:#7090c0;font-family:'Space Grotesk',sans-serif;font-size:.79rem;text-align:left;transition:all .18s;border-left:2px solid transparent;line-height:1.4}
+.les-btn:hover{color:var(--ink);background:var(--bg3)}
+.les-btn.active{color:var(--cyan);background:var(--cyan-g);border-left-color:var(--cyan)}
+.les-btn.done .lcheck{color:var(--green);opacity:1}
+.lcheck{font-size:.68rem;opacity:.3;flex-shrink:0}
+
+/* CONTENT */
+.content{padding:48px 56px;max-width:900px}
+
+/* LESSON HEADER */
+.lhdr{margin-bottom:40px}
+.ltag{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.ltitle{font-family:'Fraunces',serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:#fff;line-height:1.15}
+.ldesc{margin-top:14px;color:#b0c4e8;font-size:.97rem;line-height:1.8;font-weight:300}
+
+/* SECTION */
+.sec{margin-bottom:44px}
+.sec-title{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+.body{color:#e0ecff;font-size:.94rem;line-height:1.9;font-weight:300}
+.body strong{color:#fff;font-weight:600}
+.body code{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--cyan)}
+
+/* CODE BLOCK */
+.code-wrap{margin:20px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border2)}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--border)}
+.code-lang{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--cyan);letter-spacing:.08em;text-transform:uppercase}
+.code-file{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)}
+.code-dots{display:flex;gap:5px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.code-body{background:#030608;padding:20px 22px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.85;overflow-x:auto;color:#c8d8f0}
+.code-body .cm{color:var(--muted)}
+.code-body .ck{color:#7ab4ff}
+.code-body .cs{color:#ffd166}
+.code-body .cn{color:#ff9d7a}
+.code-body .cb{color:var(--cyan)}
+.code-body .cv{color:#b39ddb}
+
+/* STEP CARDS */
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.step{display:flex;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;transition:border-color .2s}
+.step:hover{border-color:var(--border2)}
+.step-num{width:32px;height:32px;border-radius:8px;background:var(--blue-g);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--blue);font-weight:700;flex-shrink:0}
+.step-content h4{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:5px}
+.step-content p{font-size:.82rem;color:#9ab0e0;line-height:1.6}
+.step-content code{font-family:'JetBrains Mono',monospace;font-size:.78rem;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--cyan)}
+
+/* CARD GRID */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:16px}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 16px;transition:all .2s}
+.ccard:hover{border-color:var(--border2);transform:translateY(-2px)}
+.ccard-icon{font-size:1.5rem;margin-bottom:10px}
+.ccard-title{font-size:.87rem;font-weight:700;color:#fff;margin-bottom:5px}
+.ccard-text{font-size:.78rem;color:#9ab0e0;line-height:1.6}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:14px}
+.tbl th{background:var(--card2);color:var(--orange);font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:11px 15px;text-align:left;border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 15px;border-bottom:1px solid var(--border);color:#d8e8ff;vertical-align:top}
+.tbl tr:hover td{background:var(--card)}
+
+/* CALLOUT */
+.callout{border-radius:10px;padding:18px 22px;margin:22px 0;border:1px solid}
+.callout-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.callout p{font-size:.87rem;line-height:1.7}
+.callout-warn{background:var(--orange-g);border-color:var(--orange)}.callout-warn .callout-lbl{color:var(--orange)}
+.callout-tip {background:var(--cyan-g); border-color:var(--cyan)}.callout-tip .callout-lbl{color:var(--cyan)}
+.callout-ok  {background:var(--green-g);border-color:var(--green)}.callout-ok .callout-lbl{color:var(--green)}
+.callout-info{background:var(--blue-g); border-color:var(--blue)}.callout-info .callout-lbl{color:var(--blue)}
+
+/* FLOW */
+.flow{display:flex;align-items:stretch;flex-wrap:wrap;gap:0;margin:18px 0}
+.flow-node{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;min-width:120px;text-align:center}
+.flow-node .fn-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.flow-node .fn-text{font-size:.8rem;color:var(--ink);line-height:1.4}
+.flow-arrow{display:flex;align-items:center;padding:0 6px;color:var(--muted);font-size:1rem;flex-shrink:0}
+
+/* TAGS */
+.tag{display:inline-block;padding:2px 10px;border-radius:100px;font-size:.7rem;font-weight:600;font-family:'JetBrains Mono',monospace}
+.tag-blue{background:var(--blue-g);color:var(--blue);border:1px solid var(--blue)}
+.tag-cyan{background:var(--cyan-g);color:var(--cyan);border:1px solid var(--cyan)}
+.tag-orange{background:var(--orange-g);color:var(--orange);border:1px solid var(--orange)}
+.tag-green{background:var(--green-g);color:var(--green);border:1px solid var(--green)}
+.tag-red{background:#ff3d6b20;color:var(--red);border:1px solid var(--red)}
+
+/* COMPLETE / NAV */
+.complete-btn{display:block;width:100%;margin-top:36px;padding:15px;background:transparent;border:1px solid var(--blue);border-radius:8px;color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.complete-btn:hover{background:var(--blue-g)}
+.complete-btn.done{background:var(--green-g);color:var(--green);border-color:var(--green)}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:48px;padding-top:28px;border-top:1px solid var(--border)}
+.nav-btn{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px 20px;cursor:pointer;color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:.84rem;font-weight:600;transition:all .2s}
+.nav-btn:hover{border-color:var(--blue);color:var(--blue)}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.nav-btn:disabled:hover{border-color:var(--border);color:var(--ink)}
+.nav-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.nav-btn.primary:hover{background:var(--cyan);border-color:var(--cyan);color:#000}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.lhdr,.sec{animation:fadeUp .35s ease both}
+
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .content{padding:28px 20px}
+  .hero{padding:36px 20px 32px}
+  .flow{flex-direction:column}
+  .flow-arrow{transform:rotate(90deg);padding:4px 0}
+}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-eyebrow">
+    <div class="eyebrow-chip"><span class="eyebrow-dot"></span> Nivel Avanzado</div>
+    <span class="hero-cap">Capítulo 1 de 2</span>
+  </div>
+  <h1>Chatbot IA Avanzado<br><span class="accent">Twilio</span> + <span class="accent2">Make.com</span> + OpenAI</h1>
+  <p class="hero-sub">Configuración técnica profunda: webhooks reales, orquestación de escenarios en Make, gestión de contexto conversacional y Twilio como canal de producción.</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-val">5</div><div class="hstat-lbl">Módulos</div></div>
+    <div class="hstat"><div class="hstat-val">~3h</div><div class="hstat-lbl">Contenido</div></div>
+    <div class="hstat"><div class="hstat-val">20+</div><div class="hstat-lbl">Configuraciones reales</div></div>
+  </div>
+</div>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="prog-wrap">
+    <div class="prog-top"><span>Progreso</span><span id="pct">0%</span></div>
+    <div class="prog-track"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">Módulos</div>
+  <div id="sidenav"></div>
+</aside>
+<main class="content" id="content"></main>
+</div>
+
+<script>
+var MODS=[
+{id:'m1',title:'Twilio: Configuración Profesional',lessons:[
+{id:'l1-1',title:'Crear cuenta y número Twilio',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 1 · Lección 1</div>
+  <h2 class="ltitle">Twilio: Crear Cuenta y Número de Producción</h2>
+  <p class="ldesc">Twilio es el BSP (Business Solution Provider) más potente del mercado. Aprende a configurarlo correctamente desde cero para entornos de producción, no de prueba.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">¿Por qué Twilio sobre otras opciones?</div>
+  <div class="cgrid">
+    <div class="ccard"><div class="ccard-icon">🔌</div><div class="ccard-title">API REST completa</div><div class="ccard-text">Control total sobre cada mensaje, webhook y evento. Sin limitaciones de interfaz visual.</div></div>
+    <div class="ccard"><div class="ccard-icon">📊</div><div class="ccard-title">Logs en tiempo real</div><div class="ccard-text">Dashboard con trazabilidad completa: cada mensaje, error y latencia visible al instante.</div></div>
+    <div class="ccard"><div class="ccard-icon">🌍</div><div class="ccard-title">Números globales</div><div class="ccard-text">Números locales en +180 países. Ideal para negocios que atienden en múltiples regiones.</div></div>
+    <div class="ccard"><div class="ccard-icon">⚙️</div><div class="ccard-title">Webhooks nativos</div><div class="ccard-text">Recibe y envía eventos HTTP en tiempo real hacia Make.com u otros sistemas.</div></div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Pasos de configuración inicial</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Crear cuenta en twilio.com</h4><p>Regístrate con email de empresa. Twilio da $15 USD de crédito gratis para pruebas. Verifica tu número de teléfono personal para activar la cuenta.</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Activar WhatsApp Sandbox vs. Producción</h4><p>Para pruebas: usa el <strong>WhatsApp Sandbox</strong> (gratis, sin aprobación). Para producción: solicita acceso a la <strong>WhatsApp Business API</strong> vía Twilio, requiere aprobación de Meta (3-5 días hábiles).</p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Obtener credenciales esenciales</h4><p>En el dashboard de Twilio, copia: <code>Account SID</code>, <code>Auth Token</code> y el número <code>From</code> de WhatsApp (formato: <code>whatsapp:+14155238886</code> en sandbox).</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Configurar webhook de entrada</h4><p>En <strong>Messaging → Settings → WhatsApp Sandbox Settings</strong>, coloca la URL de Make.com en el campo <code>WHEN A MESSAGE COMES IN</code>. Método: <code>HTTP POST</code>.</p></div></div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Estructura de credenciales Twilio</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">ENV</span><span class="code-file">.env</span></div>
+    <div class="code-body">
+<span class="cm"># Credenciales Twilio — NUNCA commitear en Git</span>
+<span class="ck">TWILIO_ACCOUNT_SID</span>=<span class="cs">ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+<span class="ck">TWILIO_AUTH_TOKEN</span>=<span class="cs">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+<span class="ck">TWILIO_WHATSAPP_FROM</span>=<span class="cs">whatsapp:+14155238886</span>  <span class="cm"># sandbox</span>
+
+<span class="cm"># En producción tu número aprobado:</span>
+<span class="ck">TWILIO_WHATSAPP_FROM</span>=<span class="cs">whatsapp:+50688888888</span>
+    </div>
+  </div>
+</div>
+<div class="callout callout-warn">
+  <div class="callout-lbl">⚠️ Seguridad crítica</div>
+  <p>Nunca expongas el <strong>Auth Token</strong> en código cliente o repositorios públicos. Usa variables de entorno. Si se filtra, ve inmediatamente a Twilio Console → Settings → Rotate Auth Token.</p>
+</div>`;}},
+{id:'l1-2',title:'Webhook Twilio → Make.com en detalle',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 1 · Lección 2</div>
+  <h2 class="ltitle">Webhook de Twilio hacia Make.com: Anatomía Completa</h2>
+  <p class="ldesc">Cuando un usuario envía un mensaje de WhatsApp, Twilio dispara un HTTP POST hacia tu webhook. Aprende exactamente qué datos llegan y cómo procesarlos en Make.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">Payload que envía Twilio al webhook</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">HTTP POST</span><span class="code-file">Twilio → Make.com Webhook</span></div>
+    <div class="code-body">
+<span class="cm"># Twilio envía estos campos en el POST body (form-encoded)</span>
+
+<span class="ck">MessageSid</span>=<span class="cs">SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>  <span class="cm"># ID único del mensaje</span>
+<span class="ck">AccountSid</span>=<span class="cs">ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+<span class="ck">From</span>=<span class="cs">whatsapp:+50688888888</span>  <span class="cm"># número del USUARIO</span>
+<span class="ck">To</span>=<span class="cs">whatsapp:+14155238886</span>  <span class="cm"># tu número de negocio</span>
+<span class="ck">Body</span>=<span class="cs">Hola, ¿cuánto cuesta el plan pro?</span>  <span class="cm"># TEXTO del mensaje</span>
+<span class="ck">NumMedia</span>=<span class="cs">0</span>  <span class="cm"># archivos adjuntos (0 = solo texto)</span>
+<span class="ck">ProfileName</span>=<span class="cs">José Quiros</span>  <span class="cm"># nombre del contacto en WhatsApp</span>
+<span class="ck">WaId</span>=<span class="cs">50688888888</span>  <span class="cm"># número sin prefijo whatsapp:</span>
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Configurar el webhook en Make.com paso a paso</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Crear escenario nuevo en Make.com</h4><p>Ve a Make.com → <strong>Create a new scenario</strong>. Como primer módulo, busca y agrega <strong>Webhooks → Custom Webhook</strong>. Haz clic en <strong>Add</strong> para crear el webhook.</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Copiar la URL del webhook</h4><p>Make genera una URL única como: <code>https://hook.us1.make.com/xxxxxxxxxxxxxxxx</code>. Copia esta URL completa.</p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Pegar en Twilio Console</h4><p>En Twilio → Messaging → Settings → WhatsApp Sandbox Settings. Pega la URL en <strong>"WHEN A MESSAGE COMES IN"</strong>. Método: <code>HTTP POST</code>. Guarda.</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Determinar estructura de datos</h4><p>En Make, haz clic en <strong>"Run once"</strong> y envía un mensaje de prueba desde WhatsApp al número sandbox. Make captura el payload automáticamente y mapea todos los campos disponibles.</p></div></div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Campos más útiles para extraer</div>
+  <table class="tbl">
+    <thead><tr><th>Campo Twilio</th><th>Variable en Make</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>Body</code></td><td><code>{{1.Body}}</code></td><td>El texto que escribió el usuario → enviar a OpenAI</td></tr>
+      <tr><td><code>From</code></td><td><code>{{1.From}}</code></td><td>Número del usuario → para responder y guardar en Airtable</td></tr>
+      <tr><td><code>ProfileName</code></td><td><code>{{1.ProfileName}}</code></td><td>Nombre del contacto → personalizar respuesta ("Hola José")</td></tr>
+      <tr><td><code>MessageSid</code></td><td><code>{{1.MessageSid}}</code></td><td>ID único → guardar para trazabilidad y evitar duplicados</td></tr>
+      <tr><td><code>WaId</code></td><td><code>{{1.WaId}}</code></td><td>Número limpio → key en Airtable para el historial</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="callout callout-tip">
+  <div class="callout-lbl">💡 Validar autenticidad del webhook</div>
+  <p>Twilio firma cada request con un header <code>X-Twilio-Signature</code>. Para entornos de producción, verifica esta firma en Make usando un módulo HTTP para comparar el HMAC-SHA1. Evita que actores maliciosos llamen tu webhook directamente.</p>
+</div>`;}},
+{id:'l1-3',title:'Responder desde Make.com vía Twilio API',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 1 · Lección 3</div>
+  <h2 class="ltitle">Enviar Respuestas desde Make.com a través de la API de Twilio</h2>
+  <p class="ldesc">Aprende a configurar el módulo HTTP en Make para enviar mensajes de vuelta al usuario usando la REST API de Twilio, con autenticación correcta y manejo de errores.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">Anatomía de la llamada API a Twilio</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">HTTP POST</span><span class="code-file">Make → Twilio API</span></div>
+    <div class="code-body">
+<span class="cm"># URL del endpoint de Twilio Messages API</span>
+<span class="ck">URL</span>: <span class="cs">https://api.twilio.com/2010-04-01/Accounts/</span><span class="cn">{{ACCOUNT_SID}}</span><span class="cs">/Messages.json</span>
+
+<span class="cm"># Autenticación Basic Auth (usuario:contraseña)</span>
+<span class="ck">Username</span>: <span class="cn">{{ACCOUNT_SID}}</span>
+<span class="ck">Password</span>: <span class="cn">{{AUTH_TOKEN}}</span>
+
+<span class="cm"># Body (form-data o application/x-www-form-urlencoded)</span>
+<span class="ck">From</span>: <span class="cs">whatsapp:+14155238886</span>    <span class="cm"># tu número sandbox/prod</span>
+<span class="ck">To</span>:   <span class="cv">{{1.From}}</span>               <span class="cm"># número del usuario (del webhook)</span>
+<span class="ck">Body</span>: <span class="cv">{{respuesta_de_openai}}</span> <span class="cm"># texto generado por GPT</span>
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Configurar en Make: módulo HTTP Make a Request</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Agregar módulo HTTP → Make a Request</h4><p>En tu escenario de Make, después del módulo de OpenAI, agrega <strong>HTTP → Make a Request</strong>. Este módulo hace llamadas a cualquier API externa.</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Configurar URL y método</h4><p>URL: <code>https://api.twilio.com/2010-04-01/Accounts/TU_SID/Messages.json</code><br>Método: <code>POST</code><br>Body type: <code>application/x-www-form-urlencoded</code></p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Configurar autenticación Basic</h4><p>En la sección <strong>Headers</strong>, agrega:<br><code>Authorization: Basic {{base64(SID:TOKEN)}}</code><br>O usa el campo <strong>Username/Password</strong> de Make (más limpio).</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Mapear campos del body</h4><p>Agrega los key-value pairs: <code>From</code> = tu número Twilio, <code>To</code> = <code>{{1.From}}</code> del webhook, <code>Body</code> = <code>{{respuesta_openai}}</code>.</p></div></div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Respuesta de Twilio (qué esperar)</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">JSON</span><span class="code-file">Twilio API Response (200 OK)</span></div>
+    <div class="code-body">
+{
+  <span class="ck">"sid"</span>: <span class="cs">"SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"</span>,
+  <span class="ck">"status"</span>: <span class="cs">"queued"</span>,  <span class="cm">// queued → sent → delivered</span>
+  <span class="ck">"to"</span>: <span class="cs">"whatsapp:+50688888888"</span>,
+  <span class="ck">"from"</span>: <span class="cs">"whatsapp:+14155238886"</span>,
+  <span class="ck">"body"</span>: <span class="cs">"Hola José, el plan Pro cuesta $49/mes..."</span>,
+  <span class="ck">"date_created"</span>: <span class="cs">"2025-03-27T14:30:00Z"</span>,
+  <span class="ck">"error_code"</span>: <span class="cb">null</span>,
+  <span class="ck">"error_message"</span>: <span class="cb">null</span>
+}
+    </div>
+  </div>
+</div>
+<div class="callout callout-warn">
+  <div class="callout-lbl">⚠️ Error 63016 — ventana de 24h</div>
+  <p>WhatsApp solo permite enviar mensajes libremente si el usuario escribió primero en las últimas 24 horas. Si pasan más de 24h, debes usar <strong>Message Templates</strong> pre-aprobados por Meta. Twilio retorna error <code>63016</code> si intentas enviar fuera de esta ventana.</p>
+</div>`;}},
+]},
+{id:'m2',title:'OpenAI: Contexto y Memoria',lessons:[
+{id:'l2-1',title:'Gestión de historial conversacional',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 2 · Lección 1</div>
+  <h2 class="ltitle">Gestión de Historial Conversacional con OpenAI</h2>
+  <p class="ldesc">GPT no tiene memoria entre llamadas. Aprende a construir y gestionar el historial de conversación manualmente para que el bot recuerde contexto de mensajes anteriores.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">El problema de la falta de memoria</div>
+  <p class="body">OpenAI GPT es <strong>stateless</strong> — cada llamada a la API es independiente. Si el usuario dice "me llamo José" y en el siguiente mensaje pregunta "¿recuerdas mi nombre?", GPT responderá que no lo sabe a menos que <strong>tú</strong> le envíes el historial completo en cada request.</p>
+  <div class="callout callout-info">
+    <div class="callout-lbl">📐 Arquitectura clave</div>
+    <p>El historial se almacena en <strong>Airtable</strong> por número de usuario (<code>WaId</code>). En cada nuevo mensaje, Make recupera el historial, lo inyecta en el request de OpenAI, y luego guarda el nuevo turno.</p>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Estructura del array messages para OpenAI</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">JSON</span><span class="code-file">OpenAI Chat Completions Request</span></div>
+    <div class="code-body">
+{
+  <span class="ck">"model"</span>: <span class="cs">"gpt-4o-mini"</span>,
+  <span class="ck">"messages"</span>: [
+    {
+      <span class="ck">"role"</span>: <span class="cs">"system"</span>,
+      <span class="ck">"content"</span>: <span class="cs">"Eres el asistente de Ruta360. Responde en español, máximo 3 oraciones."</span>
+    },
+    {
+      <span class="ck">"role"</span>: <span class="cs">"user"</span>,     <span class="cm">// mensaje anterior del usuario</span>
+      <span class="ck">"content"</span>: <span class="cs">"Me llamo José y quiero información sobre el plan Pro"</span>
+    },
+    {
+      <span class="ck">"role"</span>: <span class="cs">"assistant"</span>,  <span class="cm">// respuesta anterior del bot</span>
+      <span class="ck">"content"</span>: <span class="cs">"Hola José, el plan Pro incluye acceso completo por $49/mes."</span>
+    },
+    {
+      <span class="ck">"role"</span>: <span class="cs">"user"</span>,     <span class="cm">// mensaje ACTUAL (el nuevo)</span>
+      <span class="ck">"content"</span>: <span class="cs">"¿Aceptan tarjetas de débito?"</span>
+    }
+  ],
+  <span class="ck">"max_tokens"</span>: <span class="cb">300</span>,
+  <span class="ck">"temperature"</span>: <span class="cb">0.7</span>
+}
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Tabla de historial en Airtable</div>
+  <table class="tbl">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><code>user_id</code></td><td>Texto (PK)</td><td>WaId del usuario — clave primaria para búsqueda</td></tr>
+      <tr><td><code>history_json</code></td><td>Texto largo</td><td>Array JSON con todos los mensajes user/assistant</td></tr>
+      <tr><td><code>last_updated</code></td><td>Fecha/Hora</td><td>Timestamp del último mensaje</td></tr>
+      <tr><td><code>turn_count</code></td><td>Número</td><td>Número de turnos — para limitar contexto si crece mucho</td></tr>
+      <tr><td><code>summary</code></td><td>Texto largo</td><td>Resumen comprimido cuando el historial supera 10 turnos</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sec">
+  <div class="sec-title">Flujo completo en Make.com</div>
+  <div class="flow">
+    <div class="flow-node"><div class="fn-label">Trigger</div><div class="fn-text">Webhook Twilio recibe mensaje</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">Airtable</div><div class="fn-text">Buscar historial por WaId</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">JSON Parse</div><div class="fn-text">Deserializar history_json</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">OpenAI</div><div class="fn-text">Enviar historial + nuevo mensaje</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">Airtable</div><div class="fn-text">Actualizar historial con nuevo turno</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">Twilio</div><div class="fn-text">Enviar respuesta al usuario</div></div>
+  </div>
+</div>`;}},
+{id:'l2-2',title:'System Prompt avanzado con contexto dinámico',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 2 · Lección 2</div>
+  <h2 class="ltitle">System Prompt Avanzado con Contexto Dinámico</h2>
+  <p class="ldesc">Un System Prompt estático es el nivel básico. El nivel avanzado inyecta contexto dinámico: datos del cliente, hora actual, inventario en tiempo real, o información del CRM.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">Técnica: inyección de variables en el System Prompt</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">TEXT</span><span class="code-file">System Prompt con variables dinámicas</span></div>
+    <div class="code-body">
+<span class="cm"># Make.com construye este texto con los datos del usuario</span>
+
+Eres el asistente virtual de <span class="cn">{{empresa.nombre}}</span>.
+Tu nombre es <span class="cn">{{bot.nombre}}</span>.
+
+<span class="cm">## Contexto del cliente actual:</span>
+- Nombre: <span class="cn">{{cliente.nombre}}</span>
+- Es cliente desde: <span class="cn">{{cliente.fecha_registro}}</span>
+- Plan actual: <span class="cn">{{cliente.plan}}</span>
+- Conversaciones previas: <span class="cn">{{cliente.num_conversaciones}}</span>
+
+<span class="cm">## Fecha y hora actual:</span>
+<span class="cn">{{formatDate(now; "dddd D [de] MMMM, HH:mm")}}</span>
+Zona horaria: Costa Rica (GMT-6)
+
+<span class="cm">## Tus capacidades hoy:</span>
+<span class="cb">{{#if fuera_de_horario}}</span>
+⚠️ Estás operando fuera de horario laboral.
+Puedes capturar datos pero NO confirmes citas.
+<span class="cb">{{else}}</span>
+✅ Horario normal. Puedes agendar citas directamente.
+<span class="cb">{{/if}}</span>
+
+<span class="cm">## Precios actuales (NO inventarte precios distintos):</span>
+<span class="cn">{{precios_desde_airtable}}</span>
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Cómo construir el System Prompt en Make</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Recuperar datos del cliente</h4><p>Antes del módulo OpenAI, agrega Airtable → Search Records buscando por <code>WaId</code>. Si existe el registro, tendrás nombre, plan, historial disponibles como variables <code>{{resultado.nombre}}</code>.</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Verificar si es fuera de horario</h4><p>Usa el módulo <strong>Tools → Set Variable</strong> con la función <code>{{if(hour(now) >= 8 and hour(now) <= 18; "false"; "true")}}</code> para crear la variable <code>fuera_de_horario</code>.</p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Construir el prompt en un Text Parser</h4><p>Agrega <strong>Text Parser → Replace</strong> o simplemente usa el campo <strong>System Message</strong> del módulo OpenAI en Make, que acepta cualquier combinación de texto y variables <code>{{variable}}</code>.</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Inyectar precios desde Airtable</h4><p>Recupera una tabla de precios de Airtable, usa <strong>Array Aggregator</strong> para convertirla en texto formateado, e inyéctala en el System Prompt. El bot nunca inventará precios.</p></div></div>
+  </div>
+</div>
+<div class="callout callout-ok">
+  <div class="callout-lbl">✅ Resultado esperado</div>
+  <p>Con esta técnica, GPT responde como si <em>conociera</em> al cliente: "Hola José, veo que llevas con nosotros desde enero y estás en el plan Básico. ¿Quieres saber qué incluye el Pro?"</p>
+</div>`;}},
+]},
+{id:'m3',title:'Make.com: Escenarios Avanzados',lessons:[
+{id:'l3-1',title:'Escenario de routing inteligente por intención',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 3 · Lección 1</div>
+  <h2 class="ltitle">Routing Inteligente por Intención del Usuario</h2>
+  <p class="ldesc">En lugar de responder todo con GPT, usa un primer llamado a OpenAI para clasificar la intención del mensaje y luego rutear a flujos especializados: ventas, soporte, agendamiento.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">Arquitectura de routing con Make Router</div>
+  <div class="flow">
+    <div class="flow-node"><div class="fn-label">Entrada</div><div class="fn-text">Mensaje del usuario</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">OpenAI #1</div><div class="fn-text">Clasificar intención → JSON</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">Router</div><div class="fn-text">Bifurcar por intención</div></div>
+  </div>
+  <div style="margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+    <div class="ccard" style="border-color:var(--green)"><div class="ccard-icon">💰</div><div class="ccard-title" style="color:var(--green)">Ruta: Ventas</div><div class="ccard-text">OpenAI con contexto de precios + CTA de compra</div></div>
+    <div class="ccard" style="border-color:var(--cyan)"><div class="ccard-icon">🛠️</div><div class="ccard-title" style="color:var(--cyan)">Ruta: Soporte</div><div class="ccard-text">OpenAI con base de conocimiento de FAQs técnicos</div></div>
+    <div class="ccard" style="border-color:var(--orange)"><div class="ccard-icon">📅</div><div class="ccard-title" style="color:var(--orange)">Ruta: Agenda</div><div class="ccard-text">Conectar con Google Calendar API para disponibilidad</div></div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Prompt de clasificación (primer llamado OpenAI)</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">PROMPT</span><span class="code-file">Clasificador de intención</span></div>
+    <div class="code-body">
+<span class="cm"># System Message del primer módulo OpenAI</span>
+
+Eres un clasificador de intenciones.
+Analiza el mensaje del usuario y responde SOLO con un JSON,
+sin texto adicional, sin markdown.
+
+Formato de respuesta:
+{
+  <span class="ck">"intent"</span>: <span class="cs">"ventas|soporte|agenda|saludo|otro"</span>,
+  <span class="ck">"confidence"</span>: <span class="cb">0.0</span> <span class="cm">a</span> <span class="cb">1.0</span>,
+  <span class="ck">"sub_intent"</span>: <span class="cs">"precio|demo|queja|factura|disponibilidad"</span>,
+  <span class="ck">"urgente"</span>: <span class="cb">true|false</span>
+}
+
+Ejemplos:
+- "¿cuánto cuesta?" → intent: ventas, sub_intent: precio
+- "mi pedido no llegó" → intent: soporte, sub_intent: queja, urgente: true
+- "quiero agendar una llamada" → intent: agenda
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Configurar el Router en Make.com</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Parsear el JSON de respuesta</h4><p>Después del módulo OpenAI clasificador, agrega <strong>JSON → Parse JSON</strong> con la respuesta de GPT. Ahora tienes <code>{{intent}}</code>, <code>{{confidence}}</code> como variables separadas.</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Agregar módulo Router</h4><p>Conecta un módulo <strong>Router</strong> después del JSON Parser. El Router permite crear múltiples rutas con condiciones diferentes.</p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Definir condiciones por ruta</h4><p>Ruta 1: <code>{{intent}} = "ventas"</code>. Ruta 2: <code>{{intent}} = "soporte"</code>. Ruta 3: <code>{{intent}} = "agenda"</code>. Ruta fallback: <code>{{confidence}} &lt; 0.7</code> → handoff humano.</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Construir cada rama independiente</h4><p>Cada rama tiene su propio módulo OpenAI con un System Prompt especializado. La rama de ventas incluye precios; soporte incluye FAQs; agenda conecta con Calendar.</p></div></div>
+  </div>
+</div>
+<div class="callout callout-tip">
+  <div class="callout-lbl">💡 Optimización de costos</div>
+  <p>El clasificador usa <code>gpt-4o-mini</code> (muy barato) para una tarea simple. Solo las rutas que lo necesitan usan <code>gpt-4o</code> (más caro). Esto puede reducir el costo hasta un 70% vs. usar GPT-4 para todo.</p>
+</div>`;}},
+{id:'l3-2',title:'Manejo de errores y reintentos en Make',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 3 · Lección 2</div>
+  <h2 class="ltitle">Manejo de Errores y Reintentos en Make.com</h2>
+  <p class="ldesc">Un escenario de producción debe manejar fallos de red, timeouts de OpenAI y errores de Twilio sin dejar al usuario sin respuesta.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">Tipos de errores más comunes</div>
+  <table class="tbl">
+    <thead><tr><th>Error</th><th>Fuente</th><th>Causa típica</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tag-red">429</span></td><td>OpenAI</td><td>Rate limit excedido</td><td>Reintento con backoff exponencial</td></tr>
+      <tr><td><span class="tag tag-red">500</span></td><td>OpenAI</td><td>Error interno de OpenAI</td><td>Reintento automático × 3</td></tr>
+      <tr><td><span class="tag tag-orange">63016</span></td><td>Twilio</td><td>Ventana de 24h expirada</td><td>Usar Message Template aprobado</td></tr>
+      <tr><td><span class="tag tag-red">Timeout</span></td><td>Make</td><td>OpenAI tardó más de 40 seg</td><td>Respuesta provisional + reintento</td></tr>
+      <tr><td><span class="tag tag-orange">JSON inválido</span></td><td>OpenAI</td><td>GPT no respetó formato JSON</td><td>Validar y reintentar con instrucción más explícita</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sec">
+  <div class="sec-title">Configurar Error Handler en Make</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Clic derecho en módulo → Add error handler</h4><p>En cualquier módulo de Make, haz clic derecho y selecciona <strong>Add error handler</strong>. Opciones: <strong>Resume</strong> (continúa con valor alternativo), <strong>Retry</strong> (reintenta), <strong>Rollback</strong> (deshace), <strong>Break</strong> (detiene).</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Configurar Retry para errores de OpenAI</h4><p>En el error handler del módulo OpenAI, selecciona <strong>Retry</strong>. Configura: <strong>Max retries: 3</strong>, <strong>Interval: 60 seconds</strong>. Make reintentará automáticamente antes de fallar.</p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Mensaje de fallback al usuario</h4><p>Si todos los reintentos fallan, usa una ruta de error que envíe vía Twilio: <em>"Estamos experimentando alta demanda. Un asesor te contactará en breve."</em> Nunca dejes al usuario sin respuesta.</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Alertas al equipo en caso de fallo</h4><p>Conecta el error handler a un módulo de <strong>Gmail o Slack</strong> que notifique al equipo técnico con el detalle del error, el mensaje del usuario y el timestamp.</p></div></div>
+  </div>
+</div>
+<div class="callout callout-warn">
+  <div class="callout-lbl">⚠️ Diferencia importante en Make</div>
+  <p>Los <strong>errores de módulo</strong> (404, 500) activan el error handler. Los <strong>errores lógicos</strong> (JSON mal formado, valor vacío) NO lo activan — debes validarlos tú con módulos <strong>Filter</strong> o <strong>Tools → Set Variable</strong> con condicionales.</p>
+</div>`;}},
+]},
+{id:'m4',title:'Patrones de Producción',lessons:[
+{id:'l4-1',title:'Rate limiting y control de costos OpenAI',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 4 · Lección 1</div>
+  <h2 class="ltitle">Rate Limiting y Control de Costos de OpenAI</h2>
+  <p class="ldesc">Sin control, los costos de OpenAI pueden dispararse. Aprende a implementar límites por usuario, cachear respuestas comunes y monitorear el gasto en tiempo real.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">Estrategias de control de costos</div>
+  <div class="cgrid">
+    <div class="ccard"><div class="ccard-icon">⏱️</div><div class="ccard-title">Rate limit por usuario</div><div class="ccard-text">Máximo N mensajes por hora por WaId. Evita abusos y conversaciones infinitas.</div></div>
+    <div class="ccard"><div class="ccard-icon">💾</div><div class="ccard-title">Cache de respuestas</div><div class="ccard-text">Para preguntas idénticas, devolver respuesta cacheada en Airtable sin llamar a OpenAI.</div></div>
+    <div class="ccard"><div class="ccard-icon">✂️</div><div class="ccard-title">Truncar historial</div><div class="ccard-text">Máximo 10 turnos en el contexto. Comprimir turnos viejos con un resumen GPT.</div></div>
+    <div class="ccard"><div class="ccard-icon">📊</div><div class="ccard-title">Monitorear tokens</div><div class="ccard-text">Guardar usage.total_tokens de cada respuesta de OpenAI en Airtable para análisis.</div></div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Implementar rate limit por usuario en Make</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">LÓGICA</span><span class="code-file">Rate Limit en Make.com</span></div>
+    <div class="code-body">
+<span class="cm"># Flujo de rate limiting en Make</span>
+
+<span class="cm">1. Recuperar registro del usuario en Airtable</span>
+   Campos relevantes:
+   - <span class="ck">mensajes_ultima_hora</span>: <span class="cb">número</span>
+   - <span class="ck">timestamp_primer_mensaje</span>: <span class="cb">datetime</span>
+
+<span class="cm">2. Calcular si está dentro de la ventana (1 hora)</span>
+   <span class="ck">minutos_transcurridos</span> = <span class="cv">{{dateDifference(now; timestamp_primer_mensaje; "minutes")}}</span>
+
+<span class="cm">3. Condición Filter antes de OpenAI:</span>
+   SI <span class="ck">minutos_transcurridos</span> &lt; 60 Y <span class="ck">mensajes_ultima_hora</span> >= 20:
+     → Enviar mensaje de límite alcanzado
+     → NO llamar a OpenAI
+   SINO:
+     → Continuar con flujo normal
+     → Incrementar contador en Airtable
+
+<span class="cm">4. Resetear contador si minutos_transcurridos >= 60</span>
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Guardar uso de tokens para análisis de costos</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">JSON</span><span class="code-file">Respuesta OpenAI con datos de uso</span></div>
+    <div class="code-body">
+{
+  <span class="ck">"choices"</span>: [{ <span class="ck">"message"</span>: { <span class="ck">"content"</span>: <span class="cs">"Hola José..."</span> } }],
+  <span class="ck">"usage"</span>: {
+    <span class="ck">"prompt_tokens"</span>: <span class="cb">485</span>,     <span class="cm">// tokens del input (historial + mensaje)</span>
+    <span class="ck">"completion_tokens"</span>: <span class="cb">87</span>,  <span class="cm">// tokens de la respuesta generada</span>
+    <span class="ck">"total_tokens"</span>: <span class="cb">572</span>       <span class="cm">// total cobrable</span>
+  },
+  <span class="ck">"model"</span>: <span class="cs">"gpt-4o-mini"</span>
+}
+
+<span class="cm"># Costo aproximado gpt-4o-mini (2025):</span>
+<span class="cm"># Input:  $0.00015 por 1K tokens</span>
+<span class="cm"># Output: $0.00060 por 1K tokens</span>
+<span class="cm"># 572 tokens ≈ $0.00013 USD por conversación</span>
+    </div>
+  </div>
+</div>`;}},
+{id:'l4-2',title:'Message Templates de WhatsApp con Twilio',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 4 · Lección 2</div>
+  <h2 class="ltitle">Message Templates de WhatsApp: Notificaciones Proactivas</h2>
+  <p class="ldesc">Para contactar usuarios que no han escrito en las últimas 24 horas, debes usar Message Templates aprobados por Meta. Aprende a crearlos y enviarlos vía Twilio.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">¿Qué son los Message Templates?</div>
+  <p class="body">Son mensajes pre-aprobados por Meta que puedes enviar fuera de la ventana de 24 horas. Se usan para: recordatorios de citas, confirmaciones de pedido, notificaciones de pago, seguimiento de leads.</p>
+  <div class="callout callout-info">
+    <div class="callout-lbl">📋 Proceso de aprobación</div>
+    <p>1. Crear template en Twilio Console o Meta Business Suite. 2. Meta revisa el contenido (24-48h). 3. Una vez aprobado, puedes usarlo en API. Rechazos comunes: contenido promocional excesivo, variables mal definidas, URLs no verificadas.</p>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Crear template con variables en Twilio</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">TEMPLATE</span><span class="code-file">Template: recordatorio_cita</span></div>
+    <div class="code-body">
+<span class="cm"># Nombre del template: recordatorio_cita</span>
+<span class="cm"># Categoría: UTILITY (no MARKETING — más fácil aprobar)</span>
+<span class="cm"># Idioma: es (español)</span>
+
+<span class="cm"># Cuerpo del mensaje (máx 1024 caracteres):</span>
+Hola <span class="cv">{{1}}</span>, te recordamos que tienes una cita
+con <span class="cn">{{nombre_empresa}}</span> el <span class="cv">{{2}}</span> a las <span class="cv">{{3}}</span>.
+
+Para confirmar responde <span class="cs">SÍ</span>.
+Para reagendar responde <span class="cs">CAMBIAR</span>.
+
+<span class="cm"># Variables:</span>
+<span class="cv">{{1}}</span> = nombre del cliente
+<span class="cv">{{2}}</span> = fecha de la cita
+<span class="cv">{{3}}</span> = hora de la cita
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Enviar template desde Make.com vía Twilio</div>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div><span class="code-lang">HTTP POST</span><span class="code-file">Make → Twilio API con Template</span></div>
+    <div class="code-body">
+<span class="ck">URL</span>: <span class="cs">https://api.twilio.com/2010-04-01/Accounts/</span><span class="cn">{{SID}}</span><span class="cs">/Messages.json</span>
+<span class="ck">Method</span>: POST
+<span class="ck">Auth</span>: Basic <span class="cn">{{SID}}</span>:<span class="cn">{{TOKEN}}</span>
+
+<span class="cm"># Body (form-urlencoded):</span>
+<span class="ck">From</span>=whatsapp:+14155238886
+<span class="ck">To</span>=whatsapp:<span class="cv">{{numero_cliente}}</span>
+<span class="ck">ContentSid</span>=<span class="cs">HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>  <span class="cm"># SID del template</span>
+<span class="ck">ContentVariables</span>=<span class="cs">{"1":"José","2":"martes 1 de abril","3":"10:00am"}</span>
+
+<span class="cm"># ContentVariables es un JSON string con las variables del template</span>
+<span class="cm"># Construirlo en Make: JSON.stringify({"1": nombre, "2": fecha, "3": hora})</span>
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-title">Flujo de seguimiento automático de leads en Make</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Schedule Trigger cada hora</h4><p>Crea un escenario separado con trigger <strong>Schedule → Every 1 hour</strong>. Este escenario busca leads pendientes de seguimiento.</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Buscar leads sin respuesta en 24h</h4><p>Airtable → Search Records con filtro: <code>estado = "lead_calificado"</code> Y <code>ultimo_contacto &lt; hace 24 horas</code>.</p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Enviar template para cada lead</h4><p>Con un Iterator, procesa cada lead encontrado. Para cada uno, envía el template de seguimiento vía Twilio con sus datos personalizados.</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Actualizar estado en Airtable</h4><p>Tras enviar, actualiza el registro: <code>estado = "seguimiento_enviado"</code>, <code>ultimo_contacto = now</code>. Evita enviar múltiples veces al mismo lead.</p></div></div>
+  </div>
+</div>`;}},
+]},
+{id:'m5',title:'Monitoreo y Optimización',lessons:[
+{id:'l5-1',title:'Dashboard de operaciones en tiempo real',content:function(){return `
+<div class="lhdr">
+  <div class="ltag">Módulo 5 · Lección 1</div>
+  <h2 class="ltitle">Dashboard de Operaciones en Tiempo Real</h2>
+  <p class="ldesc">Un sistema de producción sin monitoreo es un sistema ciego. Construye un dashboard que muestre el estado de cada componente: Twilio, Make, OpenAI y Airtable en tiempo real.</p>
+</div>
+<div class="sec">
+  <div class="sec-title">KPIs operacionales a medir</div>
+  <table class="tbl">
+    <thead><tr><th>KPI</th><th>Fuente</th><th>Alerta si...</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tasa de éxito del escenario Make</strong></td><td>Make.com API</td><td>&lt; 95% de ejecuciones exitosas</td></tr>
+      <tr><td><strong>Latencia promedio de respuesta</strong></td><td>Airtable (timestamps)</td><td>&gt; 8 segundos</td></tr>
+      <tr><td><strong>Errores por hora</strong></td><td>Make Execution Log</td><td>&gt; 5 errores/hora</td></tr>
+      <tr><td><strong>Tokens usados / costo diario</strong></td><td>Airtable (acumulado)</td><td>Supera presupuesto diario</td></tr>
+      <tr><td><strong>Mensajes sin respuesta</strong></td><td>Airtable</td><td>&gt; 2 mensajes pendientes &gt; 5 min</td></tr>
+      <tr><td><strong>Handoffs a humano</strong></td><td>Airtable</td><td>Ratio &gt; 30% (bot fallando mucho)</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sec">
+  <div class="sec-title">Configurar alertas automáticas en Make</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Escenario de monitoreo independiente</h4><p>Crea un escenario separado que corre cada 15 minutos. Lee los logs de ejecución de Make vía la <strong>Make API</strong> (sí, Make tiene API para consultar sus propias ejecuciones).</p></div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Calcular métricas del período</h4><p>Filtra las últimas 15 minutos de ejecuciones. Cuenta éxitos vs. fallos. Calcula el porcentaje. Si éxito &lt; 95%, prepara alerta.</p></div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Enviar alerta por Slack o Email</h4><p>Si se detecta anomalía, el escenario de monitoreo envía a un canal de Slack <code>#alertas-chatbot</code> con: hora, tipo de error, número de fallos y enlace al log de Make.</p></div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Vista consolidada en Airtable</h4><p>Mantén una tabla <strong>Operaciones Diarias</strong> donde cada ejecución del monitor guarda las métricas. Usa la <strong>Summary Bar</strong> y <strong>Blocks</strong> de Airtable para un dashboard visual sin código.</p></div></div>
+  </div>
+</div>
+<div class="callout callout-ok">
+  <div class="callout-lbl">🚀 Próximo paso: Capítulo 2</div>
+  <p>Completaste el Capítulo 1. El <strong>Capítulo 2</strong> profundiza en: autenticación OAuth de usuarios via WhatsApp, integración con CRMs (HubSpot/Pipedrive), pagos automatizados y deployment multi-cliente.</p>
+</div>`;}},
+]},
+];
+
+var done=new Set(),cur=null;
+var all=MODS.reduce(function(a,m){return a.concat(m.lessons);},[]);
+
+function pct(){var p=Math.round(done.size/all.length*100);document.getElementById('pct').textContent=p+'%';document.getElementById('pbar').style.width=p+'%';}
+
+function sidebar(){
+  var el=document.getElementById('sidenav');el.innerHTML='';
+  MODS.forEach(function(m,mi){
+    var g=document.createElement('div');
+    var mb=document.createElement('button');mb.className='mod-btn';
+    mb.innerHTML='<span>'+m.title+'</span><span class="mod-badge">M'+(mi+1)+'</span>';
+    g.appendChild(mb);
+    m.lessons.forEach(function(l){
+      var b=document.createElement('button');
+      b.className='les-btn'+(done.has(l.id)?' done':'')+(cur===l.id?' active':'');
+      b.innerHTML='<span class="lcheck">'+(done.has(l.id)?'✓':'○')+'</span>'+l.title;
+      b.onclick=function(){load(l.id);};
+      g.appendChild(b);
+    });
+    el.appendChild(g);
+  });
+}
+
+function load(id){
+  var l=all.find(function(x){return x.id===id;});if(!l)return;
+  cur=id;
+  var c=document.getElementById('content');
+  c.innerHTML=l.content();
+  var cb=document.createElement('button');
+  cb.className='complete-btn'+(done.has(id)?' done':'');
+  cb.textContent=done.has(id)?'✓ Completada':'Marcar como completada';
+  cb.onclick=function(){done.add(id);cb.className='complete-btn done';cb.textContent='✓ Completada';pct();sidebar();};
+  c.appendChild(cb);
+  var nav=document.createElement('div');nav.className='lesson-nav';
+  var idx=all.findIndex(function(x){return x.id===id;});
+  var prev=all[idx-1],next=all[idx+1];
+  var pb=document.createElement('button');pb.className='nav-btn';pb.innerHTML='← Anterior';pb.disabled=!prev;
+  pb.onclick=function(){if(prev)load(prev.id);};
+  var nb=document.createElement('button');nb.className='nav-btn primary';
+  nb.innerHTML=next?'Siguiente →':'✅ Fin Capítulo 1';
+  nb.onclick=function(){if(next)load(next.id);};
+  nav.appendChild(pb);nav.appendChild(nb);c.appendChild(nav);
+  sidebar();c.scrollTop=0;window.scrollTo(0,0);
+}
+
+sidebar();load(all[0].id);
+</script>
+</body>
+</html>
